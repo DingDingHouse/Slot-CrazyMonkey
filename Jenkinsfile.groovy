@@ -23,7 +23,7 @@ pipeline {
                     cd /d D:\\
                     git config --global http.postBuffer 3221225472
                     git clone git@github.com:DingDingHouse/Slot-CrazyMonkey.git D:\\Slot-CrazyMonkey || echo "Repository already exists, pulling latest changes."
-                    cd Slot-CashMachine
+                    cd Slot-CrazyMonkey
                     git fetch --all
                     git reset --hard origin/develop
                     git checkout develop
@@ -31,19 +31,17 @@ pipeline {
                 }
             }
         }
-	    
-       stage('Build WebGL') {
+        stage('Build WebGL') {
             steps {
                 script {
                     withEnv(["UNITY_PATH=${UNITY_INSTALLATION}"]) {
                         bat '''
-                        "%UNITY_PATH%" -quit -batchmode -projectPath  "%PROJECT_PATH%" -executeMethod BuildScript.BuildWebGL -logFile -
+                        "%UNITY_PATH%" -quit -batchmode -projectPath "%PROJECT_PATH%" -executeMethod BuildScript.BuildWebGL -logFile -
                         '''
                     }
                 }
             }
         }
-
 
         stage('Push Build to GitHub') {
             steps {
@@ -54,10 +52,9 @@ pipeline {
                         git clean -fd
                         git stash --include-untracked
                         git checkout develop
-			                  git pull
-			                  git add Builds
-			                  git commit -m "new build added"
-			                  git push origin develop
+                        git add -f Builds
+                        git commit -m "Add Builds"
+                        git push origin develop
                         '''
                     }
                 }
