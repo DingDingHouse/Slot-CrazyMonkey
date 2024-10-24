@@ -31,17 +31,19 @@ pipeline {
                 }
             }
         }
-        stage('Build WebGL') {
+	    
+       stage('Build WebGL') {
             steps {
                 script {
-                    withEnv(["UNITY_PATH=${UNITY_INSTALLATION}", "PROJECT_PATH=${PROJECT_PATH}"]) {
+                    withEnv(["UNITY_PATH=${UNITY_INSTALLATION}"]) {
                         bat '''
-                        "%UNITY_PATH%" -quit -batchmode -projectPath "%PROJECT_PATH%" -executeMethod BuildScript.BuildWebGL -logFile -
+                        "%UNITY_PATH%" -quit -batchmode -projectPath  "%PROJECT_PATH%" -executeMethod BuildScript.BuildWebGL -logFile -
                         '''
                     }
                 }
             }
         }
+
 
         stage('Push Build to GitHub') {
             steps {
