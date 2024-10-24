@@ -34,7 +34,7 @@ pipeline {
         stage('Build WebGL') {
             steps {
                 script {
-                    withEnv(["UNITY_PATH=${UNITY_INSTALLATION}"]) {
+                    withEnv(["UNITY_PATH=${UNITY_INSTALLATION}", "PROJECT_PATH=${PROJECT_PATH}"]) {
                         bat '''
                         "%UNITY_PATH%" -quit -batchmode -projectPath "%PROJECT_PATH%" -executeMethod BuildScript.BuildWebGL -logFile -
                         '''
