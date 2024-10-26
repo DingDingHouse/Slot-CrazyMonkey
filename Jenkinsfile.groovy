@@ -23,14 +23,11 @@ pipeline {
                         bat '''
                         hostname
                         git config --global http.postBuffer 3221225472
-                        if not exist C:\\Games\\Slot-CrazyMonkey (
-                            git clone ${REPO_URL} C:\\Games\\Slot-CrazyMonkey
-                        ) else (
-                            echo "Repository already exists, pulling latest changes."
-                            cd C:\\Games\\Slot-CrazyMonkey
-                            git fetch --all
-                            git reset --hard origin/develop
-                            git checkout develop
+                        git clone ${REPO_URL} C:\\Games\\Slot-CrazyMonkey
+                        cd C:\\Games\\Slot-CrazyMonkey
+                        git fetch --all
+                        git reset --hard origin/develop
+                        git checkout develop
                         )
                         '''
                     }
