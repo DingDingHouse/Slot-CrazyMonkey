@@ -23,7 +23,7 @@ pipeline {
                         bat '''
                         hostname
                         git config --global http.postBuffer 3221225472
-                        git clone ${REPO_URL} C:\\Games\\Slot-CrazyMonkey
+                        git clone git@github.com:DingDingHouse/Slot-CrazyMonkey.git C:\\Games\\Slot-CrazyMonkey
                         cd C:\\Games\\Slot-CrazyMonkey
                         git fetch --all
                         git reset --hard origin/develop
