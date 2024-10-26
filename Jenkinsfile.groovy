@@ -23,11 +23,15 @@ pipeline {
                         bat '''
                         hostname
                         git config --global http.postBuffer 3221225472
-                        git clone git@github.com:DingDingHouse/Slot-CrazyMonkey.git C:\\Games\\Slot-CrazyMonkey || echo "Repository already exists, pulling latest changes."
-                        cd C:\\Games\\Slot-CrazyMonkey
-                        git fetch --all
-                        git reset --hard origin/develop
-                        git checkout develop
+                        if not exist C:\\Games\\Slot-CrazyMonkey (
+                            git clone ${REPO_URL} C:\\Games\\Slot-CrazyMonkey
+                        ) else (
+                            echo "Repository already exists, pulling latest changes."
+                            cd C:\\Games\\Slot-CrazyMonkey
+                            git fetch --all
+                            git reset --hard origin/develop
+                            git checkout develop
+                        )
                         '''
                     }
                 }
@@ -58,7 +62,7 @@ pipeline {
                         git clean -fd
                         git checkout develop
                         git add -f Builds
-                        git commit -m "Add new Builds"
+                        git commit -m "Add new Builds" || echo "No changes to commit"
                         git push origin develop
                         '''
                     }
@@ -66,8 +70,7 @@ pipeline {
             }
         }
 
-    
-       stage('Deploy to S3') {
+        stage('Deploy to S3') {
             steps {
                 script {
                     dir("${PROJECT_PATH}") {
@@ -93,9 +96,6 @@ pipeline {
                     }
                 }
             }
-        }
-    }
-}
         }
     }
 }
