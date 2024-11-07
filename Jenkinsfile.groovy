@@ -1,5 +1,5 @@
 def PROJECT_NAME = "Slot-CrazyMonkey"
-def UNITY_VERSION = "2022.3.51f1"
+def UNITY_VERSION = "2022.3.48f1"
 def UNITY_INSTALLATION = "C:\\Program Files\\Unity\\Hub\\Editor\\${UNITY_VERSION}\\Editor\\Unity.exe"
 def REPO_URL = "git@github.com:DingDingHouse/Slot-CrazyMonkey.git"
 
@@ -11,30 +11,28 @@ pipeline {
     }
 
     environment {
-        PROJECT_PATH = "C:\\Games\\Slot-CrazyMonkey"
-        S3_BUCKET = "crazymonkeybucket"
+        PROJECT_PATH = "D:\\Slot-CrazyMonkey"
     }
 
     stages {
         stage('Checkout') {
             steps {
                 script {
-                    dir("${PROJECT_PATH}") {
-                        bat '''
-                        hostname
-                        git config --global http.postBuffer 3221225472
-                        git clone git@github.com:DingDingHouse/Slot-CrazyMonkey.git C:\\Games\\Slot-CrazyMonkey
-                        cd C:\\Games\\Slot-CrazyMonkey
-                        git fetch --all
-                        git reset --hard origin/develop
-                        git checkout develop
-                        )
-                        '''
-                    }
+                    bat '''
+                    cd /d D:\\
+                    git config --global http.postBuffer 3221225472
+                    git clone git@github.com:DingDingHouse/Slot-CrazyMonkey.git D:\\Slot-CrazyMonkey || echo "Repository already exists, pulling latest changes."
+                    cd Slot-CrazyMonkey
+                    git checkout main
+                    git fetch --all
+                    git reset --hard origin/develop
+                    git reset --hard origin/main
+                    git checkout develop
+                    git pull origin develop
+                    '''
                 }
             }
         }
-        
         stage('Build WebGL') {
             steps {
                 script {
@@ -53,42 +51,25 @@ pipeline {
                     dir("${PROJECT_PATH}") {
                         bat '''
                         hostname
-                        whoami
-                        git config --global user.email "prathamesh@underpinservices.com"
-                        git config --global user.name "Prathm25"
-                        git clean -fd
-                        git checkout develop
-                        git add -f Builds
-                        git commit -m "Add new Builds" || echo "No changes to commit"
+                        git add Builds
+                        git commit -m "new build"
                         git push origin develop
-                        '''
-                    }
-                }
-            }
-        }
+                        git stash -u
+                        git checkout main
+                        git rm -r -f Build
+                        git rm -r -f index.html
+                        git commit -m "delete old Builds"
+                        git push origin main
 
-        stage('Deploy to S3') {
-            steps {
-                script {
-                    dir("${PROJECT_PATH}") {
-                        bat '''
-                        REM Copy all .html files to S3 with the correct content type
-                        aws s3 cp "Builds/WebGL/" s3://%S3_BUCKET%/ --recursive --acl public-read --exclude "*" --include "*.html" --content-type "text/html"
-                        
-                        REM Copy .data files to S3 with the correct content type
-                        aws s3 cp "Builds/WebGL/" s3://%S3_BUCKET%/ --recursive --acl public-read --exclude "*" --include "*.data" --content-type "application/octet-stream"
-                        
-                        REM Copy .framework.js files to S3 with the correct content type
-                        aws s3 cp "Builds/WebGL/" s3://%S3_BUCKET%/ --recursive --acl public-read --exclude "*" --include "*.framework.js" --content-type "application/javascript"
-                        
-                        REM Copy .loader.js files to S3 with the correct content type
-                        aws s3 cp "Builds/WebGL/" s3://%S3_BUCKET%/ --recursive --acl public-read --exclude "*" --include "*.loader.js" --content-type "application/javascript"
-                        
-                        REM Copy .wasm files to S3 with the correct content type
-                        aws s3 cp "Builds/WebGL/" s3://%S3_BUCKET%/ --recursive --acl public-read --exclude "*" --include "*.wasm" --content-type "application/octet-stream"
-                        
-                        REM Move index.html to the root for S3 hosting
-                        aws s3 cp "Builds/WebGL/index.html" s3://%S3_BUCKET%/index.html --acl public-read --content-type "text/html"
+                        git checkout main
+                        git checkout develop -- Builds
+                        robocopy Builds\\WebGL\\ .\\ /move /e /copyall
+                        git rm -r -f Builds
+                        git add -f Build index.html
+                        git commit -m "adding new Builds"
+                        git push origin main
+                        git checkout develop
+                        git pull origin develop
                         '''
                     }
                 }
